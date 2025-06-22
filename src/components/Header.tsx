@@ -1,17 +1,26 @@
 
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, Menu, X, ShoppingCart } from 'lucide-react';
+import { Search, Menu, X, ShoppingCart, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useCart } from '@/contexts/CartContext';
+import { useRecentViews } from '@/contexts/RecentViewsContext';
 import CartSlideout from './CartSlideout';
 import { categories } from '@/data/products';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from '@/components/ui/dropdown-menu';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const { state, dispatch } = useCart();
+  const { recentViews, clearRecentViews } = useRecentViews();
   const navigate = useNavigate();
 
   const handleSearch = (e: React.FormEvent) => {
@@ -85,6 +94,61 @@ const Header = () => {
                   </div>
                 </div>
               </div>
+              
+              {/* Your Recent Views Dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="text-gray-700 hover:text-[#387C2B] transition-colors">
+                    <Clock className="h-4 w-4 mr-2" />
+                    Your Recent Views
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-80 bg-white shadow-lg border rounded-lg z-50">
+                  <div className="px-4 py-2 border-b">
+                    <h3 className="font-semibold text-gray-900">Recently Viewed Products</h3>
+                  </div>
+                  {recentViews.length > 0 ? (
+                    <>
+                      {recentViews.slice(0, 5).map((product) => (
+                        <DropdownMenuItem key={product.id} asChild>
+                          <Link
+                            to={`/product/${product.slug}`}
+                            className="flex items-center space-x-3 px-4 py-3 hover:bg-gray-50"
+                          >
+                            <img
+                              src={product.image}
+                              alt={product.name}
+                              className="w-12 h-12 object-cover rounded"
+                            />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium text-gray-900 truncate">
+                                {product.name}
+                              </p>
+                              <p className="text-sm text-gray-500">{product.price}</p>
+                            </div>
+                          </Link>
+                        </DropdownMenuItem>
+                      ))}
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem asChild>
+                        <button
+                          onClick={clearRecentViews}
+                          className="w-full text-center py-2 text-sm text-gray-500 hover:text-gray-700"
+                        >
+                          Clear All
+                        </button>
+                      </DropdownMenuItem>
+                    </>
+                  ) : (
+                    <div className="px-4 py-6 text-center text-gray-500">
+                      <Clock className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                      <p className="text-sm">No recent views yet</p>
+                      <p className="text-xs mt-1">Browse our products to see them here</p>
+                    </div>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+
               <Link to="/contact" className="text-gray-700 hover:text-[#387C2B] transition-colors">
                 Contact
               </Link>
@@ -92,6 +156,59 @@ const Header = () => {
 
             {/* Cart & Mobile Menu */}
             <div className="flex items-center space-x-2">
+              {/* Recent Views Mobile */}
+              <div className="lg:hidden">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="sm">
+                      <Clock className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-72 bg-white shadow-lg border rounded-lg z-50">
+                    <div className="px-3 py-2 border-b">
+                      <h3 className="font-semibold text-sm text-gray-900">Recent Views</h3>
+                    </div>
+                    {recentViews.length > 0 ? (
+                      <>
+                        {recentViews.slice(0, 3).map((product) => (
+                          <DropdownMenuItem key={product.id} asChild>
+                            <Link
+                              to={`/product/${product.slug}`}
+                              className="flex items-center space-x-2 px-3 py-2 hover:bg-gray-50"
+                            >
+                              <img
+                                src={product.image}
+                                alt={product.name}
+                                className="w-10 h-10 object-cover rounded"
+                              />
+                              <div className="flex-1 min-w-0">
+                                <p className="text-xs font-medium text-gray-900 truncate">
+                                  {product.name}
+                                </p>
+                                <p className="text-xs text-gray-500">{product.price}</p>
+                              </div>
+                            </Link>
+                          </DropdownMenuItem>
+                        ))}
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem asChild>
+                          <button
+                            onClick={clearRecentViews}
+                            className="w-full text-center py-2 text-xs text-gray-500"
+                          >
+                            Clear All
+                          </button>
+                        </DropdownMenuItem>
+                      </>
+                    ) : (
+                      <div className="px-3 py-4 text-center text-gray-500">
+                        <p className="text-xs">No recent views</p>
+                      </div>
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+
               {/* Cart Button */}
               <Button
                 variant="outline"
