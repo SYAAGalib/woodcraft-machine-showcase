@@ -1,6 +1,5 @@
-
 import React, { useState } from 'react';
-import { Plus, Search, Edit2, Trash2, Archive, Eye } from 'lucide-react';
+import { Plus, Search, Edit2, Trash2, Archive, Eye, Grid, List, Filter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -172,7 +171,7 @@ const AdminProducts = () => {
                       <Eye className="h-3 w-3" />
                     </Button>
                     <Button size="sm" variant="outline" className="h-8 w-8 p-0">
-                      <Edit className="h-3 w-3" />
+                      <Edit2 className="h-3 w-3" />
                     </Button>
                     <Button size="sm" variant="outline" className="h-8 w-8 p-0 text-red-500 hover:text-red-700">
                       <Trash2 className="h-3 w-3" />
@@ -231,7 +230,7 @@ const AdminProducts = () => {
                             View
                           </Button>
                           <Button size="sm" variant="outline">
-                            <Edit className="h-4 w-4 mr-2" />
+                            <Edit2 className="h-4 w-4 mr-2" />
                             Edit
                           </Button>
                           <Button size="sm" variant="outline" className="text-red-500 hover:text-red-700">

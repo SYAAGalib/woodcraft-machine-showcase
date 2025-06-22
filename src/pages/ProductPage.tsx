@@ -149,7 +149,7 @@ const ProductPage = () => {
           </TabsList>
           <TabsContent value="description" className="mt-6">
             <p className="text-gray-700 leading-relaxed">
-              {product.longDescription || product.description}
+              {product.fullDescription || product.description}
             </p>
           </TabsContent>
           <TabsContent value="specifications" className="mt-6">

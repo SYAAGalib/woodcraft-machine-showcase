@@ -398,6 +398,12 @@ export const getProductBySlug = (slug: string) => {
   return products.find(product => product.slug === slug);
 };
 
+export const getRelatedProducts = (categorySlug: string, excludeId: string, limit: number = 3) => {
+  return products
+    .filter(product => product.category === categorySlug && product.id !== excludeId)
+    .slice(0, limit);
+};
+
 export const getCategoryBySlug = (slug: string) => {
   return categories.find(category => category.slug === slug);
 };
