@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { useCart } from '@/contexts/CartContext';
 import { useRecentViews } from '@/contexts/RecentViewsContext';
 import CartSlideout from './CartSlideout';
-import { categories } from '@/data/products';
+import { getCategories } from '@/utils/dataManager';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,6 +22,7 @@ const Header = () => {
   const { state, dispatch } = useCart();
   const { recentViews, clearRecentViews } = useRecentViews();
   const navigate = useNavigate();
+  const categories = getCategories();
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -94,6 +95,10 @@ const Header = () => {
                   </div>
                 </div>
               </div>
+              
+              <Link to="/blog" className="text-gray-700 hover:text-[#387C2B] transition-colors">
+                Blog
+              </Link>
               
               {/* Your Recent Views Dropdown */}
               <DropdownMenu>
@@ -283,6 +288,13 @@ const Header = () => {
                   ))}
                 </div>
               </div>
+              <Link
+                to="/blog"
+                className="block py-2 text-gray-700 hover:text-[#387C2B]"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Blog
+              </Link>
               <Link
                 to="/contact"
                 className="block py-2 text-gray-700 hover:text-[#387C2B]"

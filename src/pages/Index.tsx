@@ -83,7 +83,7 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Our Machinery Categories Section */}
+      {/* Our Machinery Categories Section - Updated with round design */}
       <section className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
@@ -97,21 +97,23 @@ const Index = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
             {categories.map((category) => (
-              <Card key={category.id} className="group hover:shadow-xl transition-all duration-300">
-                <div className="relative aspect-[4/3] overflow-hidden rounded-t-lg">
+              <div key={category.id} className="group text-center">
+                <div className="relative w-48 h-48 mx-auto mb-6 overflow-hidden rounded-full shadow-lg group-hover:shadow-xl transition-shadow duration-300">
                   <img
                     src={category.image}
                     alt={category.name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                  <div className="absolute bottom-6 left-6 text-white">
-                    <h3 className="text-2xl font-bold mb-2">{category.name}</h3>
-                    <p className="text-green-100 text-sm">{category.productCount} Products</p>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-60" />
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="text-white text-center">
+                      <h3 className="text-xl font-bold mb-1">{category.name}</h3>
+                      <p className="text-green-100 text-sm">{category.productCount} Products</p>
+                    </div>
                   </div>
                 </div>
-                <CardContent className="p-6">
-                  <p className="text-gray-600 mb-4 line-clamp-3">
+                <div className="px-4">
+                  <p className="text-gray-600 mb-4 text-sm leading-relaxed">
                     {category.description}
                   </p>
                   <Link
@@ -121,8 +123,8 @@ const Index = () => {
                     View All Products
                     <ArrowRight className="h-4 w-4 ml-2" />
                   </Link>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             ))}
           </div>
         </div>

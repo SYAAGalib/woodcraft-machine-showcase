@@ -1,4 +1,3 @@
-
 export interface Product {
   id: string;
   name: string;
@@ -41,6 +40,22 @@ export interface Inquiry {
   priority: 'high' | 'medium' | 'low';
   date: string;
   lastReply?: string;
+}
+
+export interface BlogPost {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string;
+  content: string;
+  author: string;
+  date: string;
+  category: string;
+  tags: string[];
+  image: string;
+  readTime: number;
+  createdAt: string;
+  updatedAt: string;
 }
 
 // Initialize default categories
@@ -133,6 +148,11 @@ export const getProducts = (): Product[] => {
 
 export const getInquiries = (): Inquiry[] => {
   const stored = localStorage.getItem('inquiries');
+  return stored ? JSON.parse(stored) : [];
+};
+
+export const getBlogPosts = (): BlogPost[] => {
+  const stored = localStorage.getItem('blog_posts');
   return stored ? JSON.parse(stored) : [];
 };
 
@@ -333,6 +353,62 @@ const updateCategoryProductCount = (categorySlug: string): void => {
     categories[categoryIndex].productCount = productCount;
     localStorage.setItem('categories', JSON.stringify(categories));
   }
+};
+
+// Blog management functions
+export const addBlogPost = (blogData: {
+  title: string;
+  excerpt: string;
+  content: string;
+  author: string;
+  category: string;
+  tags: string[];
+  image: string;
+  readTime: number;
+}): BlogPost => {
+  const blogPosts = getBlogPosts();
+  const newBlogPost: BlogPost = {
+    id: generateId(),
+    slug: generateSlug(blogData.title),
+    date: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    ...blogData
+  };
+  
+  blogPosts.push(newBlogPost);
+  localStorage.setItem('blog_posts', JSON.stringify(blogPosts));
+  return newBlogPost;
+};
+
+export const updateBlogPost = (id: string, blogData: Partial<BlogPost>): BlogPost | null => {
+  const blogPosts = getBlogPosts();
+  const index = blogPosts.findIndex(p => p.id === id);
+  
+  if (index === -1) return null;
+  
+  blogPosts[index] = {
+    ...blogPosts[index],
+    ...blogData,
+    updatedAt: new Date().toISOString()
+  };
+  
+  localStorage.setItem('blog_posts', JSON.stringify(blogPosts));
+  return blogPosts[index];
+};
+
+export const deleteBlogPost = (id: string): boolean => {
+  const blogPosts = getBlogPosts();
+  const filteredPosts = blogPosts.filter(p => p.id !== id);
+  
+  if (filteredPosts.length === blogPosts.length) return false;
+  
+  localStorage.setItem('blog_posts', JSON.stringify(filteredPosts));
+  return true;
+};
+
+export const getBlogPostBySlug = (slug: string): BlogPost | undefined => {
+  return getBlogPosts().find(post => post.slug === slug);
 };
 
 // Helper functions for the app

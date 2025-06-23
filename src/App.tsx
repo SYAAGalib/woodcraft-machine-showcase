@@ -17,6 +17,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminProducts from "./pages/admin/AdminProducts";
 import AdminCategories from "./pages/admin/AdminCategories";
 import AdminInquiries from "./pages/admin/AdminInquiries";
+import AdminBlogs from "./pages/admin/AdminBlogs";
 import NotFound from "./pages/NotFound";
 import Layout from "./components/Layout";
 import AdminLayout from "./components/admin/AdminLayout";
@@ -54,6 +55,7 @@ const App = () => (
                 <Route path="products" element={<AdminProducts />} />
                 <Route path="categories" element={<AdminCategories />} />
                 <Route path="inquiries" element={<AdminInquiries />} />
+                <Route path="blogs" element={<AdminBlogs />} />
               </Route>
               
               <Route path="*" element={<NotFound />} />
