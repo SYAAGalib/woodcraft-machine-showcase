@@ -78,7 +78,7 @@ export const saveCategories = (categories: Category[]) => {
   localStorage.setItem(CATEGORIES_KEY, JSON.stringify(categories));
 };
 
-export const addCategory = (categoryData: Omit<Category, 'id' | 'createdAt' | 'updatedAt' | 'productCount'>) => {
+export const addCategory = (categoryData: Omit<Category, 'id' | 'slug' | 'createdAt' | 'updatedAt' | 'productCount'>) => {
   const categories = getCategories();
   const newCategory: Category = {
     ...categoryData,
@@ -126,7 +126,7 @@ export const saveProducts = (products: Product[]) => {
   updateCategoryProductCounts();
 };
 
-export const addProduct = (productData: Omit<Product, 'id' | 'createdAt' | 'updatedAt' | 'viewCount'>) => {
+export const addProduct = (productData: Omit<Product, 'id' | 'slug' | 'createdAt' | 'updatedAt' | 'viewCount'>) => {
   const products = getProducts();
   const newProduct: Product = {
     ...productData,
