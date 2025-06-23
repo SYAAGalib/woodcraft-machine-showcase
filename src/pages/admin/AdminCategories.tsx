@@ -1,19 +1,126 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Plus, Search, Edit, Trash2, Image } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
-import { categories } from '@/data/products';
+import { useToast } from '@/hooks/use-toast';
+import {
+  getCategories,
+  addCategory,
+  updateCategory,
+  deleteCategory,
+  Category
+} from '@/utils/dataManager';
 
 const AdminCategories = () => {
+  const [categories, setCategories] = useState<Category[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
+  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+  const [formData, setFormData] = useState({
+    name: '',
+    description: '',
+    image: ''
+  });
+  const { toast } = useToast();
+
+  useEffect(() => {
+    loadCategories();
+  }, []);
+
+  const loadCategories = () => {
+    const loadedCategories = getCategories();
+    setCategories(loadedCategories);
+  };
 
   const filteredCategories = categories.filter(category =>
     category.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     category.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!formData.name || !formData.description) {
+      toast({
+        title: "Error",
+        description: "Please fill in all required fields",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      if (editingCategory) {
+        updateCategory(editingCategory.id, {
+          name: formData.name,
+          description: formData.description,
+          image: formData.image || 'https://images.unsplash.com/photo-1581092335878-8c7c4c3b1e1c?w=800&h=600&fit=crop'
+        });
+        toast({
+          title: "Success",
+          description: "Category updated successfully"
+        });
+      } else {
+        addCategory({
+          name: formData.name,
+          description: formData.description,
+          image: formData.image || 'https://images.unsplash.com/photo-1581092335878-8c7c4c3b1e1c?w=800&h=600&fit=crop'
+        });
+        toast({
+          title: "Success",
+          description: "Category added successfully"
+        });
+      }
+      
+      setFormData({ name: '', description: '', image: '' });
+      setShowAddModal(false);
+      setEditingCategory(null);
+      loadCategories();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to save category",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleEdit = (category: Category) => {
+    setEditingCategory(category);
+    setFormData({
+      name: category.name,
+      description: category.description,
+      image: category.image
+    });
+    setShowAddModal(true);
+  };
+
+  const handleDelete = async (categoryId: string) => {
+    if (window.confirm('Are you sure you want to delete this category?')) {
+      try {
+        deleteCategory(categoryId);
+        toast({
+          title: "Success",
+          description: "Category deleted successfully"
+        });
+        loadCategories();
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Failed to delete category",
+          variant: "destructive"
+        });
+      }
+    }
+  };
+
+  const closeModal = () => {
+    setShowAddModal(false);
+    setEditingCategory(null);
+    setFormData({ name: '', description: '', image: '' });
+  };
 
   return (
     <div className="p-6 space-y-6">
@@ -66,11 +173,6 @@ const AdminCategories = () => {
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
               />
               <div className="absolute inset-0 bg-black bg-opacity-20 group-hover:bg-opacity-30 transition-all duration-200" />
-              <div className="absolute top-4 right-4">
-                <Button size="sm" variant="outline" className="bg-white/80 hover:bg-white">
-                  <Image className="h-4 w-4" />
-                </Button>
-              </div>
             </div>
             <CardContent className="p-6">
               <div className="flex items-start justify-between mb-3">
@@ -85,11 +187,21 @@ const AdminCategories = () => {
                 {category.description}
               </p>
               <div className="flex space-x-2">
-                <Button size="sm" variant="outline" className="flex-1">
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  className="flex-1"
+                  onClick={() => handleEdit(category)}
+                >
                   <Edit className="h-4 w-4 mr-2" />
                   Edit
                 </Button>
-                <Button size="sm" variant="outline" className="text-red-500 hover:text-red-700">
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  className="text-red-500 hover:text-red-700"
+                  onClick={() => handleDelete(category.id)}
+                >
                   <Trash2 className="h-4 w-4" />
                 </Button>
               </div>
@@ -110,7 +222,7 @@ const AdminCategories = () => {
               No categories found
             </h3>
             <p className="text-gray-600 mb-6">
-              Try adjusting your search or add a new category.
+              {searchQuery ? 'Try adjusting your search or add a new category.' : 'Start by adding your first category.'}
             </p>
             <Button onClick={() => setShowAddModal(true)}>
               <Plus className="h-4 w-4 mr-2" />
@@ -120,49 +232,60 @@ const AdminCategories = () => {
         </Card>
       )}
 
-      {/* Add Category Modal */}
+      {/* Add/Edit Category Modal */}
       {showAddModal && (
         <div className="fixed inset-0 z-50 overflow-y-auto">
           <div className="flex items-center justify-center min-h-screen px-4">
-            <div className="fixed inset-0 bg-black opacity-50" onClick={() => setShowAddModal(false)} />
+            <div className="fixed inset-0 bg-black opacity-50" onClick={closeModal} />
             <Card className="relative bg-white rounded-lg max-w-lg w-full">
               <CardContent className="p-6">
-                <h3 className="text-xl font-semibold mb-4">Add New Category</h3>
-                <div className="space-y-4">
+                <h3 className="text-xl font-semibold mb-4">
+                  {editingCategory ? 'Edit Category' : 'Add New Category'}
+                </h3>
+                <form onSubmit={handleSubmit} className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Category Name
+                      Category Name *
                     </label>
-                    <Input placeholder="e.g. CNC Machines" />
+                    <Input 
+                      placeholder="e.g. CNC Machines"
+                      value={formData.name}
+                      onChange={(e) => setFormData({...formData, name: e.target.value})}
+                      required
+                    />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Description
+                      Description *
                     </label>
                     <textarea
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#387C2B]"
                       rows={3}
                       placeholder="Brief description of the category..."
+                      value={formData.description}
+                      onChange={(e) => setFormData({...formData, description: e.target.value})}
+                      required
                     />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Category Image
+                      Image URL (optional)
                     </label>
-                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-                      <Image className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                      <p className="text-sm text-gray-600">Upload category image</p>
-                    </div>
+                    <Input
+                      placeholder="https://example.com/image.jpg"
+                      value={formData.image}
+                      onChange={(e) => setFormData({...formData, image: e.target.value})}
+                    />
                   </div>
-                </div>
-                <div className="flex space-x-3 mt-6">
-                  <Button onClick={() => setShowAddModal(false)} className="flex-1">
-                    Create Category
-                  </Button>
-                  <Button variant="outline" onClick={() => setShowAddModal(false)}>
-                    Cancel
-                  </Button>
-                </div>
+                  <div className="flex space-x-3 pt-4">
+                    <Button type="submit" className="flex-1">
+                      {editingCategory ? 'Update Category' : 'Create Category'}
+                    </Button>
+                    <Button type="button" variant="outline" onClick={closeModal}>
+                      Cancel
+                    </Button>
+                  </div>
+                </form>
               </CardContent>
             </Card>
           </div>
