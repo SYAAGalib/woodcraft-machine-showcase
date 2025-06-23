@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Search, 
   Filter, 
@@ -15,83 +15,85 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { useToast } from '@/hooks/use-toast';
+import {
+  getInquiries,
+  updateInquiry,
+  deleteInquiry,
+  Inquiry
+} from '@/utils/dataManager';
 
 const AdminInquiries = () => {
+  const [inquiries, setInquiries] = useState<Inquiry[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [selectedInquiry, setSelectedInquiry] = useState<any>(null);
+  const [selectedInquiry, setSelectedInquiry] = useState<Inquiry | null>(null);
+  const { toast } = useToast();
 
-  // Mock data for inquiries
-  const inquiries = [
-    {
-      id: 1,
-      name: 'John Smith',
-      email: 'john.smith@company.com',
-      phone: '+1 (555) 123-4567',
-      company: 'WoodCraft Industries',
-      product: 'DW-CNC-3020 Desktop CNC Router',
-      message: 'I am interested in purchasing this CNC router for our small workshop. Could you please provide pricing information and delivery timeline?',
-      department: 'sales',
-      status: 'new',
-      priority: 'high',
-      date: '2024-01-15T10:30:00Z',
-      lastReply: null
-    },
-    {
-      id: 2,
-      name: 'Sarah Johnson',
-      email: 'sarah@premiumwood.com',
-      phone: '+1 (555) 987-6543',
-      company: 'Premium Wood Solutions',
-      product: 'DW-SAW-500 Horizontal Band Saw',
-      message: 'We are looking to upgrade our sawmill operations. Please send detailed specifications and pricing for bulk orders.',
-      department: 'sales',
-      status: 'replied',
-      priority: 'medium',
-      date: '2024-01-14T14:15:00Z',
-      lastReply: '2024-01-14T16:20:00Z'
-    },
-    {
-      id: 3,
-      name: 'Mike Wilson',
-      email: 'mike@craftworkshop.net',
-      phone: '+1 (555) 456-7890',
-      company: 'Craft Workshop LLC',
-      product: 'DW-EDGE-300 Automatic Edge Bander',
-      message: 'Need technical support for installation. When can we schedule a technician visit?',
-      department: 'support',
-      status: 'in-progress',
-      priority: 'high',
-      date: '2024-01-13T09:45:00Z',
-      lastReply: '2024-01-13T11:30:00Z'
-    },
-    {
-      id: 4,
-      name: 'Lisa Chen',
-      email: 'lisa.chen@forestpro.com',
-      phone: '+1 (555) 321-0987',
-      company: 'Forest Pro Manufacturing',
-      product: 'DW-DRY-2000 Kiln Dryer',
-      message: 'Interested in the kiln dryer for our lumber processing facility. Need quote for 3 units with installation.',
-      department: 'sales',
-      status: 'archived',
-      priority: 'low',
-      date: '2024-01-12T16:20:00Z',
-      lastReply: '2024-01-12T18:45:00Z'
-    },
-  ];
+  useEffect(() => {
+    loadInquiries();
+  }, []);
+
+  const loadInquiries = () => {
+    const loadedInquiries = getInquiries();
+    // Sort by date (newest first)
+    loadedInquiries.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    setInquiries(loadedInquiries);
+  };
 
   const filteredInquiries = inquiries.filter(inquiry => {
     const matchesSearch = 
       inquiry.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       inquiry.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      inquiry.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      inquiry.product.toLowerCase().includes(searchQuery.toLowerCase());
+      (inquiry.company && inquiry.company.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (inquiry.product && inquiry.product.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      inquiry.message.toLowerCase().includes(searchQuery.toLowerCase());
     
     const matchesStatus = statusFilter === 'all' || inquiry.status === statusFilter;
     
     return matchesSearch && matchesStatus;
   });
+
+  const updateInquiryStatus = async (inquiryId: string, status: Inquiry['status']) => {
+    try {
+      const updates: Partial<Inquiry> = { status };
+      if (status === 'replied') {
+        updates.lastReply = new Date().toISOString();
+      }
+      
+      updateInquiry(inquiryId, updates);
+      loadInquiries();
+      toast({
+        title: "Success",
+        description: `Inquiry marked as ${status}`
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update inquiry",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleDelete = async (inquiryId: string) => {
+    if (window.confirm('Are you sure you want to delete this inquiry?')) {
+      try {
+        deleteInquiry(inquiryId);
+        loadInquiries();
+        toast({
+          title: "Success",
+          description: "Inquiry deleted successfully"
+        });
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Failed to delete inquiry",
+          variant: "destructive"
+        });
+      }
+    }
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -135,11 +137,7 @@ const AdminInquiries = () => {
         <div className="flex space-x-2">
           <Button variant="outline">
             <Archive className="h-4 w-4 mr-2" />
-            Archive Selected
-          </Button>
-          <Button className="bg-[#387C2B] hover:bg-[#2d6322]">
-            <Mail className="h-4 w-4 mr-2" />
-            Bulk Reply
+            Bulk Actions
           </Button>
         </div>
       </div>
@@ -217,14 +215,20 @@ const AdminInquiries = () => {
                         <Mail className="h-4 w-4 mr-2" />
                         {inquiry.email}
                       </p>
-                      <p className="flex items-center">
-                        <Phone className="h-4 w-4 mr-2" />
-                        {inquiry.phone}
-                      </p>
+                      {inquiry.phone && (
+                        <p className="flex items-center">
+                          <Phone className="h-4 w-4 mr-2" />
+                          {inquiry.phone}
+                        </p>
+                      )}
                     </div>
                     <div className="space-y-1">
-                      <p><strong>Company:</strong> {inquiry.company}</p>
-                      <p><strong>Product:</strong> {inquiry.product}</p>
+                      {inquiry.company && (
+                        <p><strong>Company:</strong> {inquiry.company}</p>
+                      )}
+                      {inquiry.product && (
+                        <p><strong>Product:</strong> {inquiry.product}</p>
+                      )}
                       <p><strong>Department:</strong> {inquiry.department}</p>
                     </div>
                   </div>
@@ -254,11 +258,34 @@ const AdminInquiries = () => {
                         <Eye className="h-4 w-4 mr-2" />
                         View Details
                       </Button>
-                      <Button size="sm" variant="outline">
-                        <MessageSquare className="h-4 w-4 mr-2" />
-                        Reply
-                      </Button>
-                      <Button size="sm" variant="outline" className="text-red-500 hover:text-red-700">
+                      
+                      {inquiry.status === 'new' && (
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => updateInquiryStatus(inquiry.id, 'in-progress')}
+                        >
+                          <MessageSquare className="h-4 w-4 mr-2" />
+                          Start Processing
+                        </Button>
+                      )}
+                      
+                      {inquiry.status === 'in-progress' && (
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => updateInquiryStatus(inquiry.id, 'replied')}
+                        >
+                          Mark as Replied
+                        </Button>
+                      )}
+                      
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        className="text-red-500 hover:text-red-700"
+                        onClick={() => handleDelete(inquiry.id)}
+                      >
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
@@ -278,7 +305,10 @@ const AdminInquiries = () => {
               No inquiries found
             </h3>
             <p className="text-gray-600">
-              No inquiries match your current search criteria.
+              {searchQuery || statusFilter !== 'all' 
+                ? 'No inquiries match your current search criteria.'
+                : 'No customer inquiries have been submitted yet.'
+              }
             </p>
           </CardContent>
         </Card>
@@ -310,14 +340,20 @@ const AdminInquiries = () => {
                       <div className="space-y-2 text-sm">
                         <p><strong>Name:</strong> {selectedInquiry.name}</p>
                         <p><strong>Email:</strong> {selectedInquiry.email}</p>
-                        <p><strong>Phone:</strong> {selectedInquiry.phone}</p>
-                        <p><strong>Company:</strong> {selectedInquiry.company}</p>
+                        {selectedInquiry.phone && (
+                          <p><strong>Phone:</strong> {selectedInquiry.phone}</p>
+                        )}
+                        {selectedInquiry.company && (
+                          <p><strong>Company:</strong> {selectedInquiry.company}</p>
+                        )}
                       </div>
                     </div>
                     <div>
                       <h4 className="font-semibold text-gray-900 mb-3">Inquiry Details</h4>
                       <div className="space-y-2 text-sm">
-                        <p><strong>Product:</strong> {selectedInquiry.product}</p>
+                        {selectedInquiry.product && (
+                          <p><strong>Product:</strong> {selectedInquiry.product}</p>
+                        )}
                         <p><strong>Department:</strong> {selectedInquiry.department}</p>
                         <p><strong>Date:</strong> {formatDate(selectedInquiry.date)}</p>
                         {selectedInquiry.lastReply && (
@@ -337,11 +373,39 @@ const AdminInquiries = () => {
                   </div>
 
                   <div className="flex space-x-3">
-                    <Button className="flex-1">
-                      <MessageSquare className="h-4 w-4 mr-2" />
-                      Reply to Customer
-                    </Button>
-                    <Button variant="outline">
+                    {selectedInquiry.status === 'new' && (
+                      <Button 
+                        className="flex-1"
+                        onClick={() => {
+                          updateInquiryStatus(selectedInquiry.id, 'in-progress');
+                          setSelectedInquiry(null);
+                        }}
+                      >
+                        <MessageSquare className="h-4 w-4 mr-2" />
+                        Start Processing
+                      </Button>
+                    )}
+                    
+                    {selectedInquiry.status === 'in-progress' && (
+                      <Button 
+                        className="flex-1"
+                        onClick={() => {
+                          updateInquiryStatus(selectedInquiry.id, 'replied');
+                          setSelectedInquiry(null);
+                        }}
+                      >
+                        <MessageSquare className="h-4 w-4 mr-2" />
+                        Mark as Replied
+                      </Button>
+                    )}
+                    
+                    <Button 
+                      variant="outline"
+                      onClick={() => {
+                        updateInquiryStatus(selectedInquiry.id, 'archived');
+                        setSelectedInquiry(null);
+                      }}
+                    >
                       <Archive className="h-4 w-4 mr-2" />
                       Archive
                     </Button>

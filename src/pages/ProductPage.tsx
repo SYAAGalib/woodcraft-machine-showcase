@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, ShoppingCart, Heart, Share2, Star } from 'lucide-react';
@@ -7,7 +8,12 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useCart } from '@/contexts/CartContext';
 import { useRecentViews } from '@/contexts/RecentViewsContext';
-import { getProductBySlug, getRelatedProducts } from '@/data/products';
+import { 
+  getProductBySlug, 
+  getRelatedProducts, 
+  getCategoryBySlug,
+  incrementProductView 
+} from '@/utils/dataManager';
 
 const ProductPage = () => {
   const { productSlug } = useParams();
@@ -16,15 +22,20 @@ const ProductPage = () => {
   
   const product = getProductBySlug(productSlug || '');
   const relatedProducts = product ? getRelatedProducts(product.category, product.id) : [];
+  const category = product ? getCategoryBySlug(product.category) : null;
 
   // Track product view
   useEffect(() => {
     if (product) {
+      // Increment view count in the system
+      incrementProductView(product.id);
+      
+      // Add to recent views
       addToRecentViews({
         id: product.id,
         name: product.name,
         slug: product.slug,
-        image: product.images[0],
+        image: product.images[0] || 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=800&h=600&fit=crop',
         price: product.price,
         category: product.category,
       });
@@ -50,7 +61,7 @@ const ProductPage = () => {
       payload: {
         id: product.id,
         name: product.name,
-        image: product.images[0],
+        image: product.images[0] || 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=800&h=600&fit=crop',
         price: product.price,
         category: product.category,
         slug: product.slug,
@@ -67,7 +78,7 @@ const ProductPage = () => {
             <Link to="/" className="text-gray-500 hover:text-[#387C2B]">Home</Link>
             <span className="mx-2 text-gray-400">/</span>
             <Link to={`/category/${product.category}`} className="text-gray-500 hover:text-[#387C2B]">
-              {product.category}
+              {category?.name || product.category}
             </Link>
             <span className="mx-2 text-gray-400">/</span>
             <span className="text-gray-900 font-medium">{product.name}</span>
@@ -81,7 +92,7 @@ const ProductPage = () => {
           {/* Product Image */}
           <div>
             <img
-              src={product.images[0]}
+              src={product.images[0] || 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=800&h=600&fit=crop'}
               alt={product.name}
               className="w-full h-auto rounded-lg shadow-md"
             />
@@ -95,10 +106,12 @@ const ProductPage = () => {
             <div className="flex items-center space-x-3 mb-4">
               <div className="flex items-center">
                 {[...Array(5)].map((_, index) => (
-                  <Star key={index} className="h-5 w-5 text-yellow-500" />
+                  <Star key={index} className="h-5 w-5 text-yellow-500 fill-current" />
                 ))}
               </div>
               <span className="text-gray-600">4.5 (125 reviews)</span>
+              <span className="text-gray-500">•</span>
+              <span className="text-gray-600">{product.viewCount} views</span>
             </div>
             <p className="text-gray-700 text-lg mb-6">{product.description}</p>
             <div className="flex items-center justify-between mb-6">
@@ -145,45 +158,54 @@ const ProductPage = () => {
           <TabsList>
             <TabsTrigger value="description">Description</TabsTrigger>
             <TabsTrigger value="specifications">Specifications</TabsTrigger>
+            <TabsTrigger value="warranty">Warranty</TabsTrigger>
             <TabsTrigger value="reviews">Reviews (125)</TabsTrigger>
           </TabsList>
           <TabsContent value="description" className="mt-6">
-            <p className="text-gray-700 leading-relaxed">
-              {product.fullDescription || product.description}
-            </p>
-          </TabsContent>
-          <TabsContent value="specifications" className="mt-6">
-            <ul className="list-disc pl-5 text-gray-700">
-              <li>Voltage: 220V</li>
-              <li>Power: 3.5kW</li>
-              <li>Dimensions: 1500 x 800 x 1200 mm</li>
-              <li>Weight: 500kg</li>
-            </ul>
-          </TabsContent>
-          <TabsContent value="reviews" className="mt-6">
-            {/* Sample Review */}
-            <Card className="mb-4">
+            <Card>
               <CardContent className="p-6">
-                <div className="flex items-center space-x-4 mb-3">
-                  <div className="rounded-full bg-gray-200 w-10 h-10 flex items-center justify-center">
-                    <span className="font-semibold">JD</span>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold">John Doe</h4>
-                    <p className="text-sm text-gray-500">Reviewed on August 12, 2023</p>
-                  </div>
-                </div>
-                <div className="flex items-center">
-                  {[...Array(5)].map((_, index) => (
-                    <Star key={index} className="h-4 w-4 text-yellow-500" />
-                  ))}
-                </div>
-                <p className="text-gray-700 mt-3">
-                  "This machine has significantly improved our production efficiency. Highly recommended!"
+                <p className="text-gray-700 leading-relaxed">
+                  {product.fullDescription || product.description}
                 </p>
               </CardContent>
             </Card>
-            {/* Add more reviews here */}
+          </TabsContent>
+          <TabsContent value="specifications" className="mt-6">
+            <Card>
+              <CardContent className="p-6">
+                {Object.keys(product.specifications).length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {Object.entries(product.specifications).map(([key, value]) => (
+                      <div key={key} className="flex justify-between border-b pb-2">
+                        <span className="font-medium text-gray-700">{key}:</span>
+                        <span className="text-gray-600">{value}</span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-gray-600">Specifications will be updated soon.</p>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+          <TabsContent value="warranty" className="mt-6">
+            <Card>
+              <CardContent className="p-6">
+                <p className="text-gray-700 leading-relaxed">
+                  {product.warranty}
+                </p>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          <TabsContent value="reviews" className="mt-6">
+            <Card>
+              <CardContent className="p-6">
+                <div className="text-center py-8 text-gray-500">
+                  <Star className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                  <p>No reviews yet. Be the first to review this product!</p>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </div>
@@ -197,7 +219,7 @@ const ProductPage = () => {
               <Card key={relatedProduct.id} className="group hover:shadow-lg transition-all duration-200">
                 <div className="relative aspect-[4/3] overflow-hidden rounded-t-lg">
                   <img
-                    src={relatedProduct.images[0]}
+                    src={relatedProduct.images[0] || 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=800&h=600&fit=crop'}
                     alt={relatedProduct.name}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
                   />
@@ -243,7 +265,7 @@ const ProductPage = () => {
         <Link to={`/category/${product.category}`}>
           <Button variant="outline">
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to {product.category}
+            Back to {category?.name || product.category}
           </Button>
         </Link>
       </div>
