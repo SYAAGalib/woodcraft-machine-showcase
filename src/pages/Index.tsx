@@ -75,7 +75,7 @@ const Index = () => {
                 Explore Machinery
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
-              <Button size="lg" variant="outline" className="border-white text-white hover:bg-[#0d1117] hover:text-[#387C2B] text-lg px-8 py-3">
+              <Button size="lg" variant="outline" className="border-white text-[#0d1117] hover:bg-white hover:text-[#387C2B] text-lg px-8 py-3">
                 Request Quote
               </Button>
             </div>
