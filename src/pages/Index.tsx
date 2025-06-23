@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Users, ShoppingCart } from 'lucide-react';
@@ -12,6 +11,7 @@ import {
   type Category,
   type Product
 } from '@/utils/dataManager';
+import ContactSection from '@/components/ContactSection';
 
 const Index = () => {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -83,46 +83,52 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Categories Section */}
-      <section className="py-16 lg:py-24 bg-gray-50">
+      {/* Our Machinery Categories Section */}
+      <section className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">
               Our Machinery Categories
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              From precision CNC routers to industrial sawmills, we provide comprehensive wood processing solutions
+              Discover our comprehensive range of wood processing machinery designed to meet every aspect of your production needs.
             </p>
           </div>
 
-          <div className="grid grid-cols-3 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
             {categories.map((category) => (
-              <Link
-                key={category.id}
-                to={`/category/${category.slug}`}
-                className="group"
-              >
-                <div className="relative aspect-square rounded-full overflow-hidden mb-4 transform transition-all duration-200 group-hover:scale-105">
+              <Card key={category.id} className="group hover:shadow-xl transition-all duration-300">
+                <div className="relative aspect-[4/3] overflow-hidden rounded-t-lg">
                   <img
                     src={category.image}
                     alt={category.name}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
-                  <div className="absolute inset-0 bg-[#387C2B] bg-opacity-20 group-hover:bg-opacity-30 transition-all duration-200" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                  <div className="absolute bottom-6 left-6 text-white">
+                    <h3 className="text-2xl font-bold mb-2">{category.name}</h3>
+                    <p className="text-green-100 text-sm">{category.productCount} Products</p>
+                  </div>
                 </div>
-                <h3 className="text-center font-semibold text-gray-900 group-hover:text-[#387C2B] transition-colors">
-                  {category.name}
-                </h3>
-                <p className="text-center text-sm text-gray-500 mt-1">
-                  {category.productCount} Products
-                </p>
-              </Link>
+                <CardContent className="p-6">
+                  <p className="text-gray-600 mb-4 line-clamp-3">
+                    {category.description}
+                  </p>
+                  <Link
+                    to={`/category/${category.slug}`}
+                    className="inline-flex items-center text-[#387C2B] font-semibold hover:text-[#2d6322] transition-colors"
+                  >
+                    View All Products
+                    <ArrowRight className="h-4 w-4 ml-2" />
+                  </Link>
+                </CardContent>
+              </Card>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Featured Products */}
+      {/* Featured Products Section */}
       <section className="py-16 lg:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
@@ -201,6 +207,120 @@ const Index = () => {
         </div>
       </section>
 
+      {/* Why Choose Us Section */}
+      <section className="py-16 lg:py-24 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
+              Why Choose Us
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              We are committed to providing the highest quality wood processing machinery and services to our customers. Our team of experts is dedicated to helping you achieve your woodworking goals.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="flex items-center justify-center p-6 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200">
+              <img
+                src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=200&h=200&fit=crop"
+                alt="Quality Assurance"
+                className="max-h-12 w-auto grayscale hover:grayscale-0 transition-all duration-200"
+              />
+              <div className="ml-4">
+                <h3 className="text-lg font-semibold text-gray-900">Quality Assurance</h3>
+                <p className="text-gray-600">Our machinery is rigorously tested and certified to meet the highest standards.</p>
+              </div>
+            </div>
+            <div className="flex items-center justify-center p-6 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200">
+              <img
+                src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=200&h=200&fit=crop"
+                alt="Customer Support"
+                className="max-h-12 w-auto grayscale hover:grayscale-0 transition-all duration-200"
+              />
+              <div className="ml-4">
+                <h3 className="text-lg font-semibold text-gray-900">Customer Support</h3>
+                <p className="text-gray-600">Our dedicated team is available to answer any questions or concerns you may have.</p>
+              </div>
+            </div>
+            <div className="flex items-center justify-center p-6 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200">
+              <img
+                src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=200&h=200&fit=crop"
+                alt="Competitive Pricing"
+                className="max-h-12 w-auto grayscale hover:grayscale-0 transition-all duration-200"
+              />
+              <div className="ml-4">
+                <h3 className="text-lg font-semibold text-gray-900">Competitive Pricing</h3>
+                <p className="text-gray-600">We offer competitive pricing for our machinery and services to ensure you get the best value for your money.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Recent Views Section */}
+      <section className="py-16 lg:py-24 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
+              Recent Views
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              See what our customers are currently viewing on our website.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {featuredProducts.map((product) => (
+              <Card key={product.id} className="group hover:shadow-lg transition-all duration-200">
+                <div className="relative aspect-[4/3] overflow-hidden rounded-t-lg">
+                  <img
+                    src={product.images[0] || 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=800&h=600&fit=crop'}
+                    alt={product.name}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                  />
+                  <div className="absolute top-4 left-4">
+                    <span className="bg-[#387C2B] text-white px-3 py-1 rounded-full text-sm font-medium">
+                      Featured
+                    </span>
+                  </div>
+                </div>
+                <CardContent className="p-6">
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2 line-clamp-2">
+                    {product.name}
+                  </h3>
+                  <p className="text-gray-600 text-sm mb-4 line-clamp-3">
+                    {product.description}
+                  </p>
+                  <div className="flex items-center justify-between">
+                    <span className="text-lg font-bold text-[#387C2B]">
+                      {product.price}
+                    </span>
+                    <div className="flex space-x-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => addToCart(product)}
+                      >
+                        <ShoppingCart className="h-4 w-4 mr-1" />
+                        Add to Cart
+                      </Button>
+                      <Link 
+                        to={`/product/${product.slug}`}
+                        onClick={() => handleProductView(product.slug)}
+                      >
+                        <Button size="sm">
+                          View Details
+                        </Button>
+                      </Link>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Clients Section */}
       <section className="py-16 lg:py-24 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -266,44 +386,7 @@ const Index = () => {
       </section>
 
       {/* Contact Section */}
-      <section className="py-16 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
-              Visit Our Location
-            </h2>
-            <p className="text-xl text-gray-600">
-              Come see our machinery in action at our showroom
-            </p>
-          </div>
-          
-          <div className="bg-gray-50 rounded-lg p-8 text-center">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div>
-                <h3 className="font-semibold text-gray-900 mb-2">Address</h3>
-                <p className="text-gray-600">
-                  123 Industrial Boulevard<br />
-                  Manufacturing District, NY 12345
-                </p>
-              </div>
-              <div>
-                <h3 className="font-semibold text-gray-900 mb-2">Phone</h3>
-                <p className="text-gray-600">
-                  +1 (555) 123-4567<br />
-                  +1 (555) 987-6543
-                </p>
-              </div>
-              <div>
-                <h3 className="font-semibold text-gray-900 mb-2">Hours</h3>
-                <p className="text-gray-600">
-                  Monday - Friday: 8AM - 6PM<br />
-                  Saturday: 9AM - 4PM
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      <ContactSection />
     </div>
   );
 };

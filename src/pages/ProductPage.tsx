@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, ShoppingCart, Heart, Share2, Star } from 'lucide-react';
@@ -8,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useCart } from '@/contexts/CartContext';
 import { useRecentViews } from '@/contexts/RecentViewsContext';
 import { getProductBySlug, getRelatedProducts } from '@/data/products';
+import ContactSection from '@/components/ContactSection';
 
 const ProductPage = () => {
   const { productSlug } = useParams();
@@ -161,7 +163,6 @@ const ProductPage = () => {
             </ul>
           </TabsContent>
           <TabsContent value="reviews" className="mt-6">
-            {/* Sample Review */}
             <Card className="mb-4">
               <CardContent className="p-6">
                 <div className="flex items-center space-x-4 mb-3">
@@ -183,7 +184,6 @@ const ProductPage = () => {
                 </p>
               </CardContent>
             </Card>
-            {/* Add more reviews here */}
           </TabsContent>
         </Tabs>
       </div>
@@ -247,6 +247,9 @@ const ProductPage = () => {
           </Button>
         </Link>
       </div>
+
+      {/* Contact Section */}
+      <ContactSection />
     </div>
   );
 };

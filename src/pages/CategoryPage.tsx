@@ -8,6 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useCart } from '@/contexts/CartContext';
 import { getCategoryBySlug, getProductsByCategory } from '@/data/products';
+import ContactSection from '@/components/ContactSection';
 
 const CategoryPage = () => {
   const { categorySlug } = useParams();
@@ -180,7 +181,7 @@ const CategoryPage = () => {
 
             {/* Products Grid/List */}
             {viewMode === 'grid' ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mb-12">
                 {filteredProducts.map((product) => (
                   <Card key={product.id} className="group hover:shadow-lg transition-all duration-200">
                     <div className="relative aspect-[4/3] overflow-hidden rounded-t-lg">
@@ -231,7 +232,7 @@ const CategoryPage = () => {
                 ))}
               </div>
             ) : (
-              <div className="space-y-6">
+              <div className="space-y-6 mb-12">
                 {filteredProducts.map((product) => (
                   <Card key={product.id} className="hover:shadow-lg transition-shadow duration-200">
                     <CardContent className="p-6">
@@ -298,6 +299,9 @@ const CategoryPage = () => {
           </div>
         </div>
       </div>
+
+      {/* Contact Section */}
+      <ContactSection />
     </div>
   );
 };

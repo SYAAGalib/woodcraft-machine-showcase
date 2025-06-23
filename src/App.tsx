@@ -10,6 +10,7 @@ import Index from "./pages/Index";
 import CategoryPage from "./pages/CategoryPage";
 import ProductPage from "./pages/ProductPage";
 import ContactPage from "./pages/ContactPage";
+import BlogPage from "./pages/BlogPage";
 import CartPage from "./pages/CartPage";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -38,6 +39,7 @@ const App = () => (
                 <Route path="/category/:categorySlug" element={<CategoryPage />} />
                 <Route path="/product/:productSlug" element={<ProductPage />} />
                 <Route path="/contact" element={<ContactPage />} />
+                <Route path="/blog" element={<BlogPage />} />
                 <Route path="/cart" element={<CartPage />} />
               </Route>
               
