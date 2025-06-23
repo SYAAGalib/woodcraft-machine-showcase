@@ -1,27 +1,44 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Users, ShoppingCart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { categories, featuredProducts } from '@/data/products';
 import { useCart } from '@/contexts/CartContext';
+import { 
+  getCategories, 
+  getFeaturedProducts, 
+  incrementProductViewBySlug,
+  type Category,
+  type Product
+} from '@/utils/dataManager';
 
 const Index = () => {
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
   const { dispatch } = useCart();
 
-  const addToCart = (product: any) => {
+  useEffect(() => {
+    setCategories(getCategories());
+    setFeaturedProducts(getFeaturedProducts());
+  }, []);
+
+  const addToCart = (product: Product) => {
     dispatch({
       type: 'ADD_ITEM',
       payload: {
         id: product.id,
         name: product.name,
-        image: product.images[0],
+        image: product.images[0] || 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=800&h=600&fit=crop',
         price: product.price,
         category: product.category,
         slug: product.slug,
       },
     });
+  };
+
+  const handleProductView = (slug: string) => {
+    incrementProductViewBySlug(slug);
   };
 
   const clients = [
@@ -78,7 +95,7 @@ const Index = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+          <div className="grid grid-cols-3 lg:grid-cols-3 gap-6">
             {categories.map((category) => (
               <Link
                 key={category.id}
@@ -117,52 +134,61 @@ const Index = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {featuredProducts.map((product) => (
-              <Card key={product.id} className="group hover:shadow-lg transition-all duration-200">
-                <div className="relative aspect-[4/3] overflow-hidden rounded-t-lg">
-                  <img
-                    src={product.images[0]}
-                    alt={product.name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
-                  />
-                  <div className="absolute top-4 left-4">
-                    <span className="bg-[#387C2B] text-white px-3 py-1 rounded-full text-sm font-medium">
-                      Featured
-                    </span>
-                  </div>
-                </div>
-                <CardContent className="p-6">
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2 line-clamp-2">
-                    {product.name}
-                  </h3>
-                  <p className="text-gray-600 text-sm mb-4 line-clamp-3">
-                    {product.description}
-                  </p>
-                  <div className="flex items-center justify-between">
-                    <span className="text-lg font-bold text-[#387C2B]">
-                      {product.price}
-                    </span>
-                    <div className="flex space-x-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => addToCart(product)}
-                      >
-                        <ShoppingCart className="h-4 w-4 mr-1" />
-                        Add to Cart
-                      </Button>
-                      <Link to={`/product/${product.slug}`}>
-                        <Button size="sm">
-                          View Details
-                        </Button>
-                      </Link>
+          {featuredProducts.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {featuredProducts.map((product) => (
+                <Card key={product.id} className="group hover:shadow-lg transition-all duration-200">
+                  <div className="relative aspect-[4/3] overflow-hidden rounded-t-lg">
+                    <img
+                      src={product.images[0] || 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=800&h=600&fit=crop'}
+                      alt={product.name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                    />
+                    <div className="absolute top-4 left-4">
+                      <span className="bg-[#387C2B] text-white px-3 py-1 rounded-full text-sm font-medium">
+                        Featured
+                      </span>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                  <CardContent className="p-6">
+                    <h3 className="text-xl font-semibold text-gray-900 mb-2 line-clamp-2">
+                      {product.name}
+                    </h3>
+                    <p className="text-gray-600 text-sm mb-4 line-clamp-3">
+                      {product.description}
+                    </p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-lg font-bold text-[#387C2B]">
+                        {product.price}
+                      </span>
+                      <div className="flex space-x-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => addToCart(product)}
+                        >
+                          <ShoppingCart className="h-4 w-4 mr-1" />
+                          Add to Cart
+                        </Button>
+                        <Link 
+                          to={`/product/${product.slug}`}
+                          onClick={() => handleProductView(product.slug)}
+                        >
+                          <Button size="sm">
+                            View Details
+                          </Button>
+                        </Link>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <p className="text-gray-500 text-lg">No featured products available yet.</p>
+            </div>
+          )}
 
           <div className="text-center mt-12">
             <Link to="/category/cnc-machines">
@@ -235,6 +261,46 @@ const Index = () => {
                 WhatsApp Us
               </Button>
             </a>
+          </div>
+        </div>
+      </section>
+
+      {/* Contact Section */}
+      <section className="py-16 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
+              Visit Our Location
+            </h2>
+            <p className="text-xl text-gray-600">
+              Come see our machinery in action at our showroom
+            </p>
+          </div>
+          
+          <div className="bg-gray-50 rounded-lg p-8 text-center">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div>
+                <h3 className="font-semibold text-gray-900 mb-2">Address</h3>
+                <p className="text-gray-600">
+                  123 Industrial Boulevard<br />
+                  Manufacturing District, NY 12345
+                </p>
+              </div>
+              <div>
+                <h3 className="font-semibold text-gray-900 mb-2">Phone</h3>
+                <p className="text-gray-600">
+                  +1 (555) 123-4567<br />
+                  +1 (555) 987-6543
+                </p>
+              </div>
+              <div>
+                <h3 className="font-semibold text-gray-900 mb-2">Hours</h3>
+                <p className="text-gray-600">
+                  Monday - Friday: 8AM - 6PM<br />
+                  Saturday: 9AM - 4PM
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </section>

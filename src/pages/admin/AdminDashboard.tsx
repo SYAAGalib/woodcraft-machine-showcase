@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { 
   Archive, 
@@ -10,9 +10,26 @@ import {
   Eye,
   ShoppingCart
 } from 'lucide-react';
-import { products, categories } from '@/data/products';
+import { 
+  getProducts, 
+  getCategories, 
+  getInquiries,
+  type Product,
+  type Category,
+  type Inquiry
+} from '@/utils/dataManager';
 
 const AdminDashboard = () => {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [inquiries, setInquiries] = useState<Inquiry[]>([]);
+
+  useEffect(() => {
+    setProducts(getProducts());
+    setCategories(getCategories());
+    setInquiries(getInquiries());
+  }, []);
+
   const stats = [
     {
       title: 'Total Products',
@@ -30,55 +47,27 @@ const AdminDashboard = () => {
     },
     {
       title: 'Inquiries',
-      value: 12,
+      value: inquiries.length,
       icon: MessageSquare,
       color: 'text-purple-600',
       bgColor: 'bg-purple-100',
     },
     {
-      title: 'Page Views',
-      value: '2.4k',
+      title: 'Total Views',
+      value: products.reduce((sum, product) => sum + (product.viewCount || 0), 0),
       icon: Eye,
       color: 'text-orange-600',
       bgColor: 'bg-orange-100',
     },
   ];
 
-  const recentInquiries = [
-    {
-      id: 1,
-      name: 'John Smith',
-      email: 'john@example.com',
-      product: 'DW-CNC-3020 Desktop CNC Router',
-      date: '2024-01-15',
-      status: 'New'
-    },
-    {
-      id: 2,
-      name: 'Sarah Johnson',
-      email: 'sarah@company.com',
-      product: 'DW-SAW-500 Horizontal Band Saw',
-      date: '2024-01-14',
-      status: 'Replied'
-    },
-    {
-      id: 3,
-      name: 'Mike Wilson',
-      email: 'mike@workshop.com',
-      product: 'DW-EDGE-300 Automatic Edge Bander',
-      date: '2024-01-13',
-      status: 'New'
-    },
-  ];
+  const recentInquiries = inquiries
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    .slice(0, 3);
 
   const topProducts = products
-    .filter(p => p.featured)
-    .slice(0, 5)
-    .map((product, index) => ({
-      ...product,
-      views: Math.floor(Math.random() * 500) + 100,
-      inquiries: Math.floor(Math.random() * 20) + 5,
-    }));
+    .sort((a, b) => (b.viewCount || 0) - (a.viewCount || 0))
+    .slice(0, 5);
 
   return (
     <div className="p-6 space-y-6">
@@ -123,27 +112,39 @@ const AdminDashboard = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {recentInquiries.map((inquiry) => (
-                <div key={inquiry.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                  <div className="flex-1">
-                    <h4 className="font-medium text-gray-900">{inquiry.name}</h4>
-                    <p className="text-sm text-gray-600">{inquiry.email}</p>
-                    <p className="text-xs text-gray-500 mt-1">{inquiry.product}</p>
+            {recentInquiries.length > 0 ? (
+              <div className="space-y-4">
+                {recentInquiries.map((inquiry) => (
+                  <div key={inquiry.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div className="flex-1">
+                      <h4 className="font-medium text-gray-900">{inquiry.name}</h4>
+                      <p className="text-sm text-gray-600">{inquiry.email}</p>
+                      <p className="text-xs text-gray-500 mt-1">{inquiry.product}</p>
+                    </div>
+                    <div className="text-right">
+                      <span className={`px-2 py-1 text-xs rounded-full ${
+                        inquiry.status === 'new' 
+                          ? 'bg-green-100 text-green-800' 
+                          : inquiry.status === 'replied'
+                          ? 'bg-blue-100 text-blue-800'
+                          : inquiry.status === 'in-progress'
+                          ? 'bg-yellow-100 text-yellow-800'
+                          : 'bg-gray-100 text-gray-800'
+                      }`}>
+                        {inquiry.status}
+                      </span>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {new Date(inquiry.date).toLocaleDateString()}
+                      </p>
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <span className={`px-2 py-1 text-xs rounded-full ${
-                      inquiry.status === 'New' 
-                        ? 'bg-green-100 text-green-800' 
-                        : 'bg-blue-100 text-blue-800'
-                    }`}>
-                      {inquiry.status}
-                    </span>
-                    <p className="text-xs text-gray-500 mt-1">{inquiry.date}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                No inquiries yet
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -152,33 +153,39 @@ const AdminDashboard = () => {
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
               <TrendingUp className="h-5 w-5" />
-              <span>Top Products</span>
+              <span>Top Products by Views</span>
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {topProducts.map((product, index) => (
-                <div key={product.id} className="flex items-center space-x-4 p-3 bg-gray-50 rounded-lg">
-                  <img
-                    src={product.images[0]}
-                    alt={product.name}
-                    className="w-12 h-12 object-cover rounded"
-                  />
-                  <div className="flex-1">
-                    <h4 className="font-medium text-gray-900 text-sm line-clamp-1">
-                      {product.name}
-                    </h4>
-                    <div className="flex space-x-4 text-xs text-gray-500 mt-1">
-                      <span>{product.views} views</span>
-                      <span>{product.inquiries} inquiries</span>
+            {topProducts.length > 0 ? (
+              <div className="space-y-4">
+                {topProducts.map((product, index) => (
+                  <div key={product.id} className="flex items-center space-x-4 p-3 bg-gray-50 rounded-lg">
+                    <img
+                      src={product.images[0] || 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=800&h=600&fit=crop'}
+                      alt={product.name}
+                      className="w-12 h-12 object-cover rounded"
+                    />
+                    <div className="flex-1">
+                      <h4 className="font-medium text-gray-900 text-sm line-clamp-1">
+                        {product.name}
+                      </h4>
+                      <div className="flex space-x-4 text-xs text-gray-500 mt-1">
+                        <span>{product.viewCount || 0} views</span>
+                        <span className="capitalize">{product.category.replace('-', ' ')}</span>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-lg font-bold text-[#387C2B]">#{index + 1}</span>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <span className="text-lg font-bold text-[#387C2B]">#{index + 1}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                No products yet
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

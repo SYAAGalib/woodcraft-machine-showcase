@@ -1,14 +1,103 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Plus, Search, Edit, Trash2, Image } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
-import { categories } from '@/data/products';
+import { useToast } from '@/hooks/use-toast';
+import { 
+  getCategories, 
+  addCategory, 
+  updateCategory, 
+  deleteCategory,
+  type Category 
+} from '@/utils/dataManager';
 
 const AdminCategories = () => {
+  const [categories, setCategories] = useState<Category[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
+  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+  const [formData, setFormData] = useState({
+    name: '',
+    description: '',
+    image: ''
+  });
+  const { toast } = useToast();
+
+  useEffect(() => {
+    loadCategories();
+  }, []);
+
+  const loadCategories = () => {
+    setCategories(getCategories());
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    try {
+      if (editingCategory) {
+        updateCategory(editingCategory.id, formData);
+        toast({
+          title: "Category Updated",
+          description: "Category has been updated successfully.",
+        });
+      } else {
+        addCategory(formData);
+        toast({
+          title: "Category Added",
+          description: "New category has been added successfully.",
+        });
+      }
+      
+      setFormData({ name: '', description: '', image: '' });
+      setShowAddModal(false);
+      setEditingCategory(null);
+      loadCategories();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to save category. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleEdit = (category: Category) => {
+    setEditingCategory(category);
+    setFormData({
+      name: category.name,
+      description: category.description,
+      image: category.image
+    });
+    setShowAddModal(true);
+  };
+
+  const handleDelete = async (id: string) => {
+    if (window.confirm('Are you sure you want to delete this category?')) {
+      try {
+        deleteCategory(id);
+        toast({
+          title: "Category Deleted",
+          description: "Category has been deleted successfully.",
+        });
+        loadCategories();
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Failed to delete category. Please try again.",
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
+  const resetForm = () => {
+    setFormData({ name: '', description: '', image: '' });
+    setEditingCategory(null);
+    setShowAddModal(false);
+  };
 
   const filteredCategories = categories.filter(category =>
     category.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -85,11 +174,21 @@ const AdminCategories = () => {
                 {category.description}
               </p>
               <div className="flex space-x-2">
-                <Button size="sm" variant="outline" className="flex-1">
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  className="flex-1"
+                  onClick={() => handleEdit(category)}
+                >
                   <Edit className="h-4 w-4 mr-2" />
                   Edit
                 </Button>
-                <Button size="sm" variant="outline" className="text-red-500 hover:text-red-700">
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  className="text-red-500 hover:text-red-700"
+                  onClick={() => handleDelete(category.id)}
+                >
                   <Trash2 className="h-4 w-4" />
                 </Button>
               </div>
@@ -120,20 +219,27 @@ const AdminCategories = () => {
         </Card>
       )}
 
-      {/* Add Category Modal */}
+      {/* Add/Edit Category Modal */}
       {showAddModal && (
         <div className="fixed inset-0 z-50 overflow-y-auto">
           <div className="flex items-center justify-center min-h-screen px-4">
-            <div className="fixed inset-0 bg-black opacity-50" onClick={() => setShowAddModal(false)} />
+            <div className="fixed inset-0 bg-black opacity-50" onClick={resetForm} />
             <Card className="relative bg-white rounded-lg max-w-lg w-full">
               <CardContent className="p-6">
-                <h3 className="text-xl font-semibold mb-4">Add New Category</h3>
-                <div className="space-y-4">
+                <h3 className="text-xl font-semibold mb-4">
+                  {editingCategory ? 'Edit Category' : 'Add New Category'}
+                </h3>
+                <form onSubmit={handleSubmit} className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Category Name
                     </label>
-                    <Input placeholder="e.g. CNC Machines" />
+                    <Input 
+                      placeholder="e.g. CNC Machines"
+                      value={formData.name}
+                      onChange={(e) => setFormData({...formData, name: e.target.value})}
+                      required
+                    />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -143,26 +249,31 @@ const AdminCategories = () => {
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#387C2B]"
                       rows={3}
                       placeholder="Brief description of the category..."
+                      value={formData.description}
+                      onChange={(e) => setFormData({...formData, description: e.target.value})}
+                      required
                     />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Category Image
+                      Image URL
                     </label>
-                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-                      <Image className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                      <p className="text-sm text-gray-600">Upload category image</p>
-                    </div>
+                    <Input
+                      placeholder="https://example.com/image.jpg"
+                      value={formData.image}
+                      onChange={(e) => setFormData({...formData, image: e.target.value})}
+                      required
+                    />
                   </div>
-                </div>
-                <div className="flex space-x-3 mt-6">
-                  <Button onClick={() => setShowAddModal(false)} className="flex-1">
-                    Create Category
-                  </Button>
-                  <Button variant="outline" onClick={() => setShowAddModal(false)}>
-                    Cancel
-                  </Button>
-                </div>
+                  <div className="flex space-x-3 mt-6">
+                    <Button type="submit" className="flex-1">
+                      {editingCategory ? 'Update Category' : 'Create Category'}
+                    </Button>
+                    <Button type="button" variant="outline" onClick={resetForm}>
+                      Cancel
+                    </Button>
+                  </div>
+                </form>
               </CardContent>
             </Card>
           </div>

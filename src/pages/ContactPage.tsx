@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Mail, Phone, MapPin, Clock, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -6,12 +5,15 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
+import { addInquiry } from '@/utils/dataManager';
 
 const ContactPage = () => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
+    company: '',
+    product: '',
     department: 'sales',
     message: '',
   });
@@ -29,22 +31,33 @@ const ContactPage = () => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Simulate form submission
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    try {
+      // Add inquiry to data manager
+      addInquiry(formData);
 
-    toast({
-      title: "Message Sent!",
-      description: "Thank you for your inquiry. We'll get back to you within 24 hours.",
-    });
+      toast({
+        title: "Message Sent!",
+        description: "Thank you for your inquiry. We'll get back to you within 24 hours.",
+      });
 
-    setFormData({
-      name: '',
-      email: '',
-      phone: '',
-      department: 'sales',
-      message: '',
-    });
-    setIsSubmitting(false);
+      setFormData({
+        name: '',
+        email: '',
+        phone: '',
+        company: '',
+        product: '',
+        department: 'sales',
+        message: '',
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to send message. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const contactInfo = [
@@ -144,6 +157,35 @@ const ContactPage = () => {
                         value={formData.phone}
                         onChange={handleInputChange}
                         placeholder="+1 (555) 123-4567"
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="company" className="block text-sm font-medium text-gray-700 mb-2">
+                        Company Name
+                      </label>
+                      <Input
+                        id="company"
+                        name="company"
+                        type="text"
+                        value={formData.company}
+                        onChange={handleInputChange}
+                        placeholder="Your company name"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label htmlFor="product" className="block text-sm font-medium text-gray-700 mb-2">
+                        Product of Interest
+                      </label>
+                      <Input
+                        id="product"
+                        name="product"
+                        type="text"
+                        value={formData.product}
+                        onChange={handleInputChange}
+                        placeholder="Specific product or general inquiry"
                       />
                     </div>
                     <div>
