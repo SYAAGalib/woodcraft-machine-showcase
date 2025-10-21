@@ -83,6 +83,12 @@ const Header = () => {
                 </button>
                 <div className="absolute top-full left-0 w-64 bg-white shadow-lg rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                   <div className="py-2">
+                    <Link
+                      to="/category/all"
+                      className="block px-4 py-2 text-sm font-semibold text-gray-900 hover:bg-gray-100 hover:text-[#387C2B] border-b"
+                    >
+                      All Categories
+                    </Link>
                     {categories.map((category) => (
                       <Link
                         key={category.id}
@@ -276,6 +282,13 @@ const Header = () => {
               <div>
                 <p className="py-2 font-semibold text-gray-900">Categories</p>
                 <div className="pl-4 space-y-1">
+                  <Link
+                    to="/category/all"
+                    className="block py-1 text-sm font-semibold text-gray-900 hover:text-[#387C2B]"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    All Categories
+                  </Link>
                   {categories.map((category) => (
                     <Link
                       key={category.id}

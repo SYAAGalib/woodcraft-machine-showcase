@@ -8,6 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useCart } from '@/contexts/CartContext';
 import { getCategoryBySlug, getProductsByCategory } from '@/data/products';
+import { getProducts } from '@/utils/dataManager';
 import ContactSection from '@/components/ContactSection';
 
 const CategoryPage = () => {
@@ -17,8 +18,9 @@ const CategoryPage = () => {
   const [showFilters, setShowFilters] = useState(false);
   const { dispatch } = useCart();
 
-  const category = getCategoryBySlug(categorySlug || '');
-  const allProducts = getProductsByCategory(categorySlug || '');
+  const isAllCategories = categorySlug === 'all';
+  const category = isAllCategories ? null : getCategoryBySlug(categorySlug || '');
+  const allProducts = isAllCategories ? getProducts() : getProductsByCategory(categorySlug || '');
   
   const filteredProducts = allProducts.filter(product =>
     product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -39,7 +41,7 @@ const CategoryPage = () => {
     });
   };
 
-  if (!category) {
+  if (!isAllCategories && !category) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -52,6 +54,11 @@ const CategoryPage = () => {
     );
   }
 
+  const pageTitle = isAllCategories ? 'All Categories' : category?.name || '';
+  const pageDescription = isAllCategories 
+    ? 'Browse our complete collection of wood processing machinery and equipment' 
+    : category?.description || '';
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Breadcrumb */}
@@ -60,7 +67,7 @@ const CategoryPage = () => {
           <nav className="text-sm">
             <Link to="/" className="text-gray-500 hover:text-[#387C2B]">Home</Link>
             <span className="mx-2 text-gray-400">/</span>
-            <span className="text-gray-900 font-medium">{category.name}</span>
+            <span className="text-gray-900 font-medium">{pageTitle}</span>
           </nav>
         </div>
       </div>
@@ -70,10 +77,10 @@ const CategoryPage = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="text-center">
             <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
-              {category.name}
+              {pageTitle}
             </h1>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-6">
-              {category.description}
+              {pageDescription}
             </p>
             <div className="flex items-center justify-center space-x-4 text-sm text-gray-500">
               <span>{filteredProducts.length} Products Available</span>
