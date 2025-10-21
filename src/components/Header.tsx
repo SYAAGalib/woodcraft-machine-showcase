@@ -8,7 +8,7 @@ import { useCart } from '@/contexts/CartContext';
 import { useRecentViews } from '@/contexts/RecentViewsContext';
 import CartSlideout from './CartSlideout';
 import { getCategories } from '@/utils/dataManager';
-import dolphinLogo from '@/assets/dolphin-logo.png';
+import dolphinLogo from '@/assets/dolphin-logo.svg';
 import {
   DropdownMenu,
   DropdownMenuContent,
