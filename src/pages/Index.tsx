@@ -56,7 +56,7 @@ const Index = () => {
         <div
           className="absolute inset-0 bg-cover bg-center"
           style={{
-            backgroundImage: '/dolphin-banar.jpg',
+            backgroundImage: '@/assets/dolphin-banar.jpg',
           }}
         />
         <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-black/30" />
