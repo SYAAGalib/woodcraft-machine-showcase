@@ -1,13 +1,14 @@
 
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, Menu, X, ShoppingCart, Clock, Fish } from 'lucide-react';
+import { Search, Menu, X, ShoppingCart, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useCart } from '@/contexts/CartContext';
 import { useRecentViews } from '@/contexts/RecentViewsContext';
 import CartSlideout from './CartSlideout';
 import { getCategories } from '@/utils/dataManager';
+import dolphinLogo from '@/assets/dolphin-logo.png';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -41,8 +42,8 @@ const Header = () => {
           <div className="flex items-center justify-between h-16 lg:h-20">
             {/* Logo */}
             <Link to="/" className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-[#387C2B] rounded-lg flex items-center justify-center">
-                <Fish className="text-white h-6 w-6" />
+              <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center p-1">
+                <img src={dolphinLogo} alt="Dolphine Wood Logo" className="w-full h-full object-contain" />
               </div>
               <div className="hidden sm:block">
                 <h1 className="text-xl lg:text-2xl font-bold text-[#387C2B]">
