@@ -65,7 +65,7 @@ const defaultCategories: Category[] = [
     name: 'CNC Machines',
     slug: 'cnc-machines',
     description: 'Precision Computer Numerical Control machines for automated wood cutting and shaping',
-    image: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=800&h=600&fit=crop',
+    image: 'https://images.jdmagicbox.com/quickquotes/images_main/cnc-router-wood-cutting-machine-2226260031-u2czeaiu.jpg?w=800&h=600&fit=crop',
     productCount: 0,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
@@ -75,7 +75,7 @@ const defaultCategories: Category[] = [
     name: 'Saw Mills',
     slug: 'saw-mills',
     description: 'Heavy-duty sawmill equipment for lumber processing and wood cutting operations',
-    image: 'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=800&h=600&fit=crop',
+    image: 'https://i.ytimg.com/vi/Jq8E9fwJ0X0/maxresdefault.jpg?w=800&h=600&fit=crop',
     productCount: 0,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
@@ -85,7 +85,7 @@ const defaultCategories: Category[] = [
     name: 'Wood Dryers',
     slug: 'wood-dryers',
     description: 'Industrial kiln dryers for efficient moisture removal from lumber',
-    image: 'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=800&h=600&fit=crop',
+    image: 'https://images.jdmagicbox.com/quickquotes/images_main/cnc-router-wood-cutting-machine-2226260031-u2czeaiu.jpg?w=800&h=600&fit=crop',
     productCount: 0,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
@@ -115,7 +115,7 @@ const defaultCategories: Category[] = [
     name: 'Sanders',
     slug: 'sanders',
     description: 'Industrial sanders for surface preparation and finishing',
-    image: 'https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?w=800&h=600&fit=crop',
+    image: 'https://image.made-in-china.com/2f0j00FqfVUnkIrBgm/Saga-High-Frequency-Wood-Drying-Chamber-Machine-Vacuum-Kiln.webp?w=800&h=600&fit=crop',
     productCount: 0,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
