@@ -12,6 +12,7 @@ import {
   type Product
 } from '@/utils/dataManager';
 import ContactSection from '@/components/ContactSection';
+import heroBanner from '@/assets/dolphin-banar.jpg';
 
 const Index = () => {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -56,7 +57,7 @@ const Index = () => {
         <div
           className="absolute inset-0 bg-cover bg-center"
           style={{
-            backgroundImage: '@/assets/dolphin-banar.jpg',
+            backgroundImage: `url(${heroBanner})`,
           }}
         />
         <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-black/30" />
