@@ -82,10 +82,10 @@ const defaultCategories: Category[] = [
   },
   {
     id: '3',
-    name: 'Wood Dryers',
-    slug: 'wood-dryers',
+    name: 'Chainsaw',
+    slug: 'chainsaw',
     description: 'Industrial kiln dryers for efficient moisture removal from lumber',
-    image: 'https://images.jdmagicbox.com/quickquotes/images_main/cnc-router-wood-cutting-machine-2226260031-u2czeaiu.jpg?w=800&h=600&fit=crop',
+    image: 'https://article.images.consumerreports.org/image/upload/t_article_tout/v1480959896/prod/content/dam/cro/news_articles/home_garden/CR-BG-Chainsaw-Hero-08-16-Crop',
     productCount: 0,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
