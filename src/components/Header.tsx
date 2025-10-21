@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, Menu, X, ShoppingCart, Clock } from 'lucide-react';
+import { Search, Menu, X, ShoppingCart, Clock, Fish } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useCart } from '@/contexts/CartContext';
@@ -42,7 +42,7 @@ const Header = () => {
             {/* Logo */}
             <Link to="/" className="flex items-center space-x-3">
               <div className="w-10 h-10 bg-[#387C2B] rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-xl">D</span>
+                <Fish className="text-white h-6 w-6" />
               </div>
               <div className="hidden sm:block">
                 <h1 className="text-xl lg:text-2xl font-bold text-[#387C2B]">
