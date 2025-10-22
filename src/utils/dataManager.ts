@@ -75,7 +75,7 @@ const defaultCategories: Category[] = [
     name: 'Saw Mills',
     slug: 'saw-mills',
     description: 'Heavy-duty sawmill equipment for lumber processing and wood cutting operations',
-    image: 'https://i.ytimg.com/vi/Jq8E9fwJ0X0/maxresdefault.jpg?w=800&h=600&fit=crop',
+    image: 'https://www.familyhandyman.com/wp-content/uploads/2022/02/Wood-Mizer-LX2515-ecomm-via-woodmizer.com_-1.jpg?w=800&h=600&fit=crop',
     productCount: 0,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
@@ -84,8 +84,8 @@ const defaultCategories: Category[] = [
     id: '3',
     name: 'Chainsaw',
     slug: 'chainsaw',
-    description: 'Industrial kiln dryers for efficient moisture removal from lumber',
-    image: 'https://article.images.consumerreports.org/image/upload/t_article_tout/v1480959896/prod/content/dam/cro/news_articles/home_garden/CR-BG-Chainsaw-Hero-08-16-Crop',
+    description: 'Industrial kiln dryers for efficient Chainsaw machine electric & dissel',
+    image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRTDUG83soA10_gzXf0ZBBG6V6pmrdNItlKxQ&s?w=800&h=600&fit=crop',
     productCount: 0,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
@@ -95,7 +95,7 @@ const defaultCategories: Category[] = [
     name: 'Edge Banders',
     slug: 'edge-banders',
     description: 'Professional edge banding machines for furniture and cabinetry finishing',
-    image: 'https://images.unsplash.com/photo-1581092335878-8c7c4c3b1e1c?w=800&h=600&fit=crop',
+    image: 'https://image.made-in-china.com/2f0j00PRKqzwkEvQru/Automatic-Trimming-Wood-Edge-Bander-for-PVC-Tape-Making-Woodworking-Machine.webp?w=800&h=600&fit=crop',
     productCount: 0,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
@@ -105,17 +105,17 @@ const defaultCategories: Category[] = [
     name: 'Planers',
     slug: 'planers',
     description: 'Thickness planers and surface planers for smooth wood finishing',
-    image: 'https://images.unsplash.com/photo-1587845216857-8296ee1b4f7b?w=800&h=600&fit=crop',
+    image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQIJIG0do5P1mcRQHEI32t6woc4XXMsJRqWRA&s?w=800&h=600&fit=crop',
     productCount: 0,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
   },
   {
     id: '6',
-    name: 'Sanders',
-    slug: 'sanders',
-    description: 'Industrial sanders for surface preparation and finishing',
-    image: 'https://image.made-in-china.com/2f0j00FqfVUnkIrBgm/Saga-High-Frequency-Wood-Drying-Chamber-Machine-Vacuum-Kiln.webp?w=800&h=600&fit=crop',
+    name: 'Blade Sharpener',
+    slug: 'blade-sharpeners',
+    description: 'Industrial blade sharpeners for precision cutting tools',
+    image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQhK5KYm2WAhDCH9xqFZnrkbaZlTj0t30Bylg&s?w=800&h=600&fit=crop',
     productCount: 0,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
@@ -429,7 +429,26 @@ export const getFeaturedProducts = (): Product[] => {
 };
 
 export const getRelatedProducts = (categorySlug: string, excludeId: string, limit: number = 3): Product[] => {
-  return getProducts()
-    .filter(product => product.category === categorySlug && product.id !== excludeId)
-    .slice(0, limit);
+  const allProducts = getProducts();
+  
+  // First, get products from the same category
+  const sameCategoryProducts = allProducts
+    .filter(product => product.category === categorySlug && product.id !== excludeId);
+  
+  // If we have enough products from the same category, return them
+  if (sameCategoryProducts.length >= limit) {
+    return sameCategoryProducts.slice(0, limit);
+  }
+  
+  // Otherwise, add random products from other categories
+  const otherProducts = allProducts
+    .filter(product => product.category !== categorySlug && product.id !== excludeId);
+  
+  // Shuffle other products for randomness
+  const shuffledOtherProducts = otherProducts.sort(() => Math.random() - 0.5);
+  
+  // Combine same category products with random others to reach the limit
+  const combined = [...sameCategoryProducts, ...shuffledOtherProducts];
+  
+  return combined.slice(0, limit);
 };

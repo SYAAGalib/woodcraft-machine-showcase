@@ -15,6 +15,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/contexts/AuthContext';
+import dolphinLogo from '@/assets/dolphin-logo.svg';
 
 const AdminLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -54,8 +55,8 @@ const AdminLayout = () => {
           {/* Sidebar Header */}
           <div className="flex items-center justify-between p-4 border-b">
             <Link to="/" className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-[#387C2B] rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">D</span>
+              <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center p-1">
+                <img src={dolphinLogo} alt="Dolphine Wood Logo" className="w-full h-full object-contain" />
               </div>
               <div>
                 <h1 className="text-lg font-bold text-[#387C2B]">Admin Panel</h1>

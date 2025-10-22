@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Search, Edit2, Trash2, Archive, Eye, Grid, List, Filter } from 'lucide-react';
+import { Plus, Search, Edit2, Trash2, Archive, Eye, Grid, List, Filter, Upload, X, Image as ImageIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
@@ -23,6 +23,10 @@ const AdminProducts = () => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [uploading, setUploading] = useState(false);
+  const [specKey, setSpecKey] = useState('');
+  const [specValue, setSpecValue] = useState('');
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -54,14 +58,29 @@ const AdminProducts = () => {
     e.preventDefault();
     
     try {
+      let imagePaths = [...formData.images];
+      
+      // Upload new files if any
+      if (uploadedFiles.length > 0) {
+        setUploading(true);
+        const uploadedPaths = await uploadImages(uploadedFiles);
+        imagePaths = [...imagePaths, ...uploadedPaths];
+        setUploading(false);
+      }
+      
+      const productData = {
+        ...formData,
+        images: imagePaths
+      };
+      
       if (editingProduct) {
-        updateProduct(editingProduct.id, formData);
+        updateProduct(editingProduct.id, productData);
         toast({
           title: "Product Updated",
           description: "Product has been updated successfully.",
         });
       } else {
-        addProduct(formData);
+        addProduct(productData);
         toast({
           title: "Product Added",
           description: "New product has been added successfully.",
@@ -77,6 +96,66 @@ const AdminProducts = () => {
         variant: "destructive",
       });
     }
+  };
+
+  const uploadImages = async (files: File[]): Promise<string[]> => {
+    const formData = new FormData();
+    files.forEach(file => {
+      formData.append('images', file);
+    });
+
+    const response = await fetch('/api/upload', {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to upload images');
+    }
+
+    const data = await response.json();
+    return data.files;
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    setUploadedFiles(prev => [...prev, ...files]);
+  };
+
+  const removeUploadedFile = (index: number) => {
+    setUploadedFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const removeExistingImage = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      images: prev.images.filter((_, i) => i !== index)
+    }));
+  };
+
+  const addSpecification = () => {
+    if (specKey.trim() && specValue.trim()) {
+      setFormData(prev => ({
+        ...prev,
+        specifications: {
+          ...prev.specifications,
+          [specKey.trim()]: specValue.trim()
+        }
+      }));
+      setSpecKey('');
+      setSpecValue('');
+    }
+  };
+
+  const removeSpecification = (key: string) => {
+    setFormData(prev => {
+      const newSpecs = { ...prev.specifications };
+      delete newSpecs[key];
+      return {
+        ...prev,
+        specifications: newSpecs
+      };
+    });
   };
 
   const handleEdit = (product: Product) => {
@@ -130,6 +209,9 @@ const AdminProducts = () => {
     });
     setEditingProduct(null);
     setShowAddModal(false);
+    setUploadedFiles([]);
+    setSpecKey('');
+    setSpecValue('');
   };
 
   const filteredProducts = products.filter(product => {
@@ -467,15 +549,87 @@ const AdminProducts = () => {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Image URLs (one per line)
+                      Product Images
                     </label>
-                    <textarea
-                      value={formData.images.join('\n')}
-                      onChange={(e) => setFormData({...formData, images: e.target.value.split('\n').filter(url => url.trim())})}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#387C2B]"
-                      rows={3}
-                      placeholder="https://example.com/image1.jpg&#10;https://example.com/image2.jpg"
-                    />
+                    
+                    {/* Existing Images */}
+                    {formData.images.length > 0 && (
+                      <div className="mb-4">
+                        <p className="text-xs text-gray-600 mb-2">Current Images:</p>
+                        <div className="grid grid-cols-3 gap-2">
+                          {formData.images.map((image, index) => (
+                            <div key={index} className="relative group">
+                              <img 
+                                src={image} 
+                                alt={`Product ${index + 1}`}
+                                className="w-full h-24 object-cover rounded border"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => removeExistingImage(index)}
+                                className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                              >
+                                <X className="h-3 w-3" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* File Upload */}
+                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-[#387C2B] transition-colors">
+                      <input
+                        type="file"
+                        id="file-upload"
+                        multiple
+                        accept="image/*"
+                        onChange={handleFileSelect}
+                        className="hidden"
+                      />
+                      <label
+                        htmlFor="file-upload"
+                        className="cursor-pointer flex flex-col items-center"
+                      >
+                        <Upload className="h-10 w-10 text-gray-400 mb-2" />
+                        <span className="text-sm font-medium text-gray-700">
+                          Click to upload images
+                        </span>
+                        <span className="text-xs text-gray-500 mt-1">
+                          PNG, JPG, GIF up to 10MB (Multiple files supported)
+                        </span>
+                      </label>
+                    </div>
+
+                    {/* Preview New Uploads */}
+                    {uploadedFiles.length > 0 && (
+                      <div className="mt-4">
+                        <p className="text-xs text-gray-600 mb-2">
+                          New uploads ({uploadedFiles.length}):
+                        </p>
+                        <div className="grid grid-cols-3 gap-2">
+                          {uploadedFiles.map((file, index) => (
+                            <div key={index} className="relative group">
+                              <img 
+                                src={URL.createObjectURL(file)} 
+                                alt={`Upload ${index + 1}`}
+                                className="w-full h-24 object-cover rounded border"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => removeUploadedFile(index)}
+                                className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                              >
+                                <X className="h-3 w-3" />
+                              </button>
+                              <div className="absolute bottom-1 left-1 bg-black bg-opacity-60 text-white text-xs px-1 rounded">
+                                {file.name.length > 15 ? file.name.substring(0, 15) + '...' : file.name}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   <div>
@@ -501,6 +655,61 @@ const AdminProducts = () => {
                     />
                   </div>
 
+                  {/* Specifications Section */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Specifications
+                    </label>
+                    
+                    {/* Existing Specifications */}
+                    {Object.keys(formData.specifications).length > 0 && (
+                      <div className="mb-3 space-y-2">
+                        {Object.entries(formData.specifications).map(([key, value]) => (
+                          <div key={key} className="flex items-center gap-2 bg-gray-50 p-2 rounded">
+                            <span className="text-sm flex-1">
+                              <strong>{key}:</strong> {value}
+                            </span>
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => removeSpecification(key)}
+                              className="h-6 w-6 p-0"
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Add New Specification */}
+                    <div className="grid grid-cols-2 gap-2">
+                      <Input
+                        value={specKey}
+                        onChange={(e) => setSpecKey(e.target.value)}
+                        placeholder="Key (e.g., Voltage)"
+                        onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addSpecification())}
+                      />
+                      <Input
+                        value={specValue}
+                        onChange={(e) => setSpecValue(e.target.value)}
+                        placeholder="Value (e.g., 220V)"
+                        onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addSpecification())}
+                      />
+                    </div>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={addSpecification}
+                      className="mt-2 w-full"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Specification
+                    </Button>
+                  </div>
+
                   <div className="flex items-center space-x-2">
                     <input
                       type="checkbox"
@@ -514,10 +723,10 @@ const AdminProducts = () => {
                   </div>
 
                   <div className="flex space-x-3 mt-6">
-                    <Button type="submit" className="flex-1">
-                      {editingProduct ? 'Update Product' : 'Create Product'}
+                    <Button type="submit" className="flex-1" disabled={uploading}>
+                      {uploading ? 'Uploading...' : (editingProduct ? 'Update Product' : 'Create Product')}
                     </Button>
-                    <Button type="button" variant="outline" onClick={resetForm}>
+                    <Button type="button" variant="outline" onClick={resetForm} disabled={uploading}>
                       Cancel
                     </Button>
                   </div>
